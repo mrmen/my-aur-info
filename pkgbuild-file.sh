@@ -22,7 +22,8 @@ cd $TMPDIR
 
 
 yaourt -G $package &>/dev/null
-cp $package/PKGBUILD .
+#cp $package/PKGBUILD . # old 
+cp $package/* .
 rm -rf $package
 
 
@@ -31,24 +32,49 @@ pkgname=$(sed -e '/pkgname=/!d; s/.*=//g' PKGBUILD)
 
 cat PKGBUILD | awk -v var=0 '{if ($0 ~ "source") {var=1}; if (var==1) {print}; if (/[\""'"'"'"]?)/) {var=0}}' | sed -e 's/.*=//g' | sed -e "s/\(.*[\"\']\)\(http.*\)\([\"\'].*\)/\2/g" > sources
 sed -i 's/[()]//g' sources
-
+# debug
+#cat sources
+# end debug
 
 touch md5sum_file
 
 mkdir download
 cd download
 
+#debug
+#ls ..
+#end debug
+
 for file in `cat ../sources`;do
     fichier=$(eval echo $file)
-    wget -O tmp_file $fichier &>/dev/null
+#debug
+#    echo $fichier
+#end debug
+    if [ -e ../$fichier ]; then
+	cp ../$fichier tmp_file
+# debug	
+#	echo "copying"
+# end debug
+    else
+	wget -O tmp_file $fichier &>/dev/null
+    fi
     md5sum tmp_file | cut -d" " -f1  >> ../md5sum_file
 done
+
+
+# debug
+#ls
+#cat ../md5sum_file
+# end debug
 
 cd ..
 rm -rf download
 
 touch actual
 sed -e "/[0-9a-f]\{32\}/!d; s/\(.*'\)\([0-9a-f]\{32\}\)\('.*\)/\2/g" PKGBUILD >> actual
+#debug
+#cat actual
+#end debug
 
 longueur=`wc -l actual | cut -d" " -f1`
 
@@ -63,7 +89,8 @@ for i in `seq 1 $longueur`; do
     fi
 done
 if (($is_out)); then 
-    echo -e $package" is out of date : some file are obsolet\n Try to update as soon as posible :)" | mail -s "Package in AUR obsolet" tetcheve@gmail.com
+    echo -e $package" is out of date : some file are obsolet\n Try to update as soon as posible :)"
+    #| mail -s "Package in AUR obsolet" tetcheve@gmail.com
 fi;
 }
 cd ..
