@@ -29,6 +29,7 @@ rm -rf $package
 
 pkgver=$(sed -e '/pkgver=/!d; s/.*=//g' PKGBUILD)
 pkgname=$(sed -e '/pkgname=/!d; s/.*=//g' PKGBUILD)
+_realname==$(sed -e '/_realname=/!d; s/.*=//g' PKGBUILD)
 
 cat PKGBUILD | awk -v var=0 '{if ($0 ~ "source") {var=1}; if (var==1) {print}; if (/[\""'"'"'"]?)/) {var=0}}' | sed -e 's/.*=//g' | sed -e "s/\(.*[\"\']\)\(http.*\)\([\"\'].*\)/\2/g" > sources
 sed -i 's/[()]//g' sources
